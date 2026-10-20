@@ -4,3 +4,4 @@ dist
 screenshots
 .env
 .DS_Store
+docs

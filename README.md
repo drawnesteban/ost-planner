@@ -77,6 +77,21 @@ Dashboard settings (click the logo and name in the sidebar), Storage and backups
 
 On a new computer: follow Install above, then pick Restore from a backup on the setup screen. Copying the whole `data/` folder into the new install also works.
 
+## Background image
+
+Dashboard settings, Background: upload an image to fill the whole window behind every screen. Panels can be Frosted (see-through and blurred) or Solid, and Dim image darkens or lightens it so text stays readable. It works with Light, Dark and Match system. The image is resized to 2880 px and saved in the library, so backups include it.
+
+To design one, use the template [`docs/ost-background-guide.psd`](docs/ost-background-guide.psd) (2880 × 1800). Its layer groups:
+
+- YOUR ARTWORK: replace this layer with your image.
+- UI REFERENCE: a real Overview screen at 2×, hidden by default.
+- UI AREAS: the sidebar (always covered), the header band where the page title sits on the art, panels (blurred when Frosted), and the gaps where the art stays sharp.
+- CROP GUIDES: the image fills the window and is centred, so edges are cropped on other screen shapes (16:9, 4:3, 21:9, phone). Keep the subject in the green safe zone.
+
+Export a JPG under about 2 MB. Preview of the guide:
+
+![Background guide](docs/ost-background-guide-preview.jpg)
+
 ## Build status
 
 | Step | Screen | State |
@@ -90,7 +105,7 @@ On a new computer: follow Install above, then pick Restore from a backup on the 
 | 6 | Timeline: project bars from start to due date, progress, milestones, today line; calendar below (mini month + agenda, Month and Year views) | Built, read-only |
 | 7 | Contacts: searchable list (by name or organization), detail card with call/message/email, add/edit/delete with photo, linked projects | Built |
 | 8 | Progress gallery: upload images per project, filter by project and kind, group by month or project; also on project pages and the Overview. Review viewer: versions (upload revision, markup copy), pen/arrow/box/circle/pin/eraser, colors, undo/redo, side-by-side compare, notes per version | Built |
-| 9 | Appearance: Light / Dark / Match system and accent color, in Dashboard settings (click the logo and name in the sidebar) | Built |
+| 9 | Appearance: Light / Dark / Match system, accent color and an optional background image (Frosted or Solid panels, dim), in Dashboard settings (click the logo and name in the sidebar) | Built |
 | 11 | Editing: Quick add menu (task, to-do card, milestone, project, personal work, contact, images); tasks add/edit/check off/delete on project pages, Tasks and Overview; start/due dates, progress and milestones from Timeline bars, milestones and project pages; Overview uses real tasks and milestones | Built |
 | 12 | Delete button with Undo on task rows; drag Timeline bars (move), their ends (start or due) and milestones; Edit details (name, client, description, amount, invoice PDF or image upload); sidebar Search (press /) across projects, contacts, tasks, milestones, to-do cards and gallery | Built |
 | 10 | Backend: Node server (no packages), first-launch library setup, saving to disk, image files, backup and restore per project or whole library | Built |
@@ -106,6 +121,7 @@ On a new computer: follow Install above, then pick Restore from a backup on the 
 - `public/css/app.css` styles
 - `public/img/projects/` placeholder project cover images
 - `public/fonts/` Helvetica Neue (from the project files)
+- `docs/` background image template (PSD) and its preview
 
 ## Testing notes
 
