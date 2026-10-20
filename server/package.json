@@ -1,0 +1,5 @@
+{
+  "name": "ost-planner-server",
+  "private": true,
+  "type": "module"
+}

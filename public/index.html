@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>OST Planner</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body class="booting">
+  <div id="setup" class="setup" hidden></div>
+  <div class="shell">
+    <aside class="sidebar" id="sidebar">
+      <button class="brand" id="brand" type="button" title="Edit name and logo">
+        <span class="brand-mark" id="brand-mark">O</span>
+        <span class="brand-name" id="brand-name">OST Planner</span>
+      </button>
+
+      <button class="search" type="button">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <span>Search</span>
+        <kbd>/</kbd>
+      </button>
+
+      <nav class="nav" id="nav"></nav>
+
+      <div class="nav-section">
+        <div class="nav-heading">Active projects</div>
+        <ul class="nav-projects" id="nav-projects"></ul>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-btn" id="menu-btn" type="button" aria-label="Menu">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div>
+          <p class="eyebrow" id="today"></p>
+          <h1 id="page-title">Overview</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn ghost" id="customize-btn" type="button">Customize</button>
+          <div class="quick">
+            <button class="btn" type="button" id="quick-add" aria-haspopup="menu" aria-expanded="false">+ Quick add</button>
+            <div class="quick-menu" id="quick-menu" role="menu" hidden></div>
+          </div>
+        </div>
+      </header>
+
+      <div id="view"></div>
+    </main>
+  </div>
+
+  <dialog class="dialog" id="brand-dialog">
+    <form method="dialog" id="brand-form">
+      <h2>Dashboard settings</h2>
+      <label class="field">
+        <span>Name</span>
+        <input type="text" id="brand-input" maxlength="40" required>
+      </label>
+      <div class="field">
+        <span>Logo</span>
+        <div class="logo-row">
+          <span class="brand-mark large" id="logo-preview">O</span>
+          <label class="btn ghost">Upload image<input type="file" id="logo-file" accept="image/*" hidden></label>
+          <button class="btn ghost" type="button" id="logo-remove">Remove</button>
+        </div>
+        <small>PNG, JPG or SVG. It's shown square in the sidebar.</small>
+      </div>
+      <div class="settings-section">
+        <h3>Appearance</h3>
+        <div class="field">
+          <span>Theme</span>
+          <div class="segmented" role="group" aria-label="Theme" id="theme-mode">
+            <button type="button" data-theme-mode="light">Light</button>
+            <button type="button" data-theme-mode="dark">Dark</button>
+            <button type="button" data-theme-mode="auto">Match system</button>
+          </div>
+        </div>
+        <div class="field">
+          <span>Accent color</span>
+          <div class="theme-swatches" id="accent-swatches"></div>
+          <small>Used for buttons, the logo tile and highlights. Changes show live; Cancel undoes them.</small>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h3>Storage and backups</h3>
+        <div class="field">
+          <span>Library folder</span>
+          <code class="lib-path" id="lib-path"></code>
+          <small id="lib-usage"></small>
+        </div>
+        <div class="field">
+          <span>Back up</span>
+          <a class="btn ghost" id="backup-all" href="/api/backup" download>Back up everything</a>
+          <div class="backup-row">
+            <select class="select" id="backup-project" aria-label="Project to back up"></select>
+            <a class="btn ghost" id="backup-one" download>Back up project</a>
+          </div>
+          <small>Downloads a .zip with the data and images. Copy it to the other computer and restore it there.</small>
+        </div>
+        <div class="field">
+          <span>Restore</span>
+          <label class="btn ghost restore-btn">Restore from a backup…<input type="file" id="restore-file" accept=".zip,application/zip" hidden></label>
+          <small>A whole-library backup replaces what's here (a copy of the current library is saved in its backups folder first). A project backup is added.</small>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="project-dialog">
+    <form method="dialog" id="project-form">
+      <h2 id="project-dialog-title">New project</h2>
+      <label class="field">
+        <span>Name</span>
+        <input type="text" id="project-name" maxlength="60" required>
+      </label>
+      <div class="field-row">
+        <label class="field">
+          <span>Start date</span>
+          <input type="date" id="project-start">
+        </label>
+        <label class="field">
+          <span>Due date</span>
+          <input type="date" id="project-due">
+        </label>
+      </div>
+      <label class="field">
+        <span>Image</span>
+        <input type="file" id="project-image" accept="image/*">
+        <small>Optional. You can change it later in Customize.</small>
+      </label>
+      <label class="check-field">
+        <input type="checkbox" id="project-active" checked>
+        <span>Active</span>
+      </label>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn" value="save">Create project</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog card-dialog" id="card-dialog">
+    <form method="dialog">
+      <div class="card-dialog-head">
+        <textarea id="card-title" rows="2" maxlength="200" aria-label="Card title"></textarea>
+        <button class="icon-btn" value="close" aria-label="Close">×</button>
+      </div>
+      <p class="card-meta" id="card-meta"></p>
+      <h3>Comments</h3>
+      <ul class="comments" id="card-comments"></ul>
+      <textarea id="card-comment-input" rows="3" placeholder="Write a comment…" maxlength="2000"></textarea>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="close">Close</button>
+        <button class="btn" type="button" id="card-comment-add">Add comment</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="contact-dialog">
+    <form method="dialog" id="contact-form">
+      <h2 id="contact-dialog-title">New contact</h2>
+      <div class="field">
+        <span>Photo</span>
+        <div class="logo-row">
+          <span class="avatar large" id="contact-photo-preview"></span>
+          <label class="btn ghost">Upload photo<input type="file" id="contact-photo" accept="image/*" hidden></label>
+          <button class="btn ghost" type="button" id="contact-photo-remove">Remove</button>
+        </div>
+      </div>
+      <label class="field"><span>Name</span><input type="text" id="contact-name" maxlength="80" required></label>
+      <label class="field"><span>Organization</span><input type="text" id="contact-org" maxlength="80" list="contact-orgs"><small>Projects whose client matches this name are linked to the contact.</small></label>
+      <datalist id="contact-orgs"></datalist>
+      <label class="field"><span>Role</span><input type="text" id="contact-role" maxlength="80"></label>
+      <label class="field"><span>Phone</span><input type="tel" id="contact-phone" maxlength="40"></label>
+      <label class="field"><span>Email</span><input type="email" id="contact-email" maxlength="120"></label>
+      <label class="field"><span>Notes</span><textarea id="contact-notes" rows="3" maxlength="2000"></textarea></label>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn" value="save" id="contact-save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="upload-dialog">
+    <form method="dialog" id="upload-form">
+      <h2>Upload images</h2>
+      <label class="field">
+        <span>Images</span>
+        <input type="file" id="upload-files" accept="image/*" multiple required>
+        <small id="upload-hint">Each image is resized to at most 2400px and saved in your library.</small>
+      </label>
+      <label class="field"><span>Project</span><select class="select" id="upload-project" required></select></label>
+      <label class="field"><span>Kind</span><select class="select" id="upload-kind"><option>Photo</option><option>Drawing</option><option>Render</option></select></label>
+      <label class="field"><span>Date</span><input type="date" id="upload-date" required></label>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn" value="save">Upload</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="review" id="lightbox" aria-label="Image review">
+    <div class="rv-top">
+      <button type="button" class="rv-tool" data-rvfile="-1" aria-label="Previous file" title="Previous file">‹</button>
+      <button type="button" class="rv-tool" data-rvfile="1" aria-label="Next file" title="Next file">›</button>
+      <div class="rv-head" id="rv-head"></div>
+      <button type="button" class="rv-tool rv-close" data-rvclose aria-label="Close" title="Close">×</button>
+    </div>
+    <div class="rv-tools" id="rv-tools"></div>
+    <div class="rv-body">
+      <aside class="rv-versions" id="rv-versions" aria-label="Versions"></aside>
+      <div class="rv-stage" id="rv-stage"></div>
+      <aside class="rv-side" id="rv-side"></aside>
+    </div>
+  </dialog>
+
+  <dialog class="dialog" id="task-dialog">
+    <form method="dialog">
+      <h2 id="task-dialog-title">New task</h2>
+      <label class="field"><span>Task</span><input type="text" id="task-name" maxlength="120" required autocomplete="off"></label>
+      <label class="field"><span>Project</span><select class="select" id="task-project"></select></label>
+      <div class="field-row">
+        <label class="field"><span>Due date</span><input type="date" id="task-due"></label>
+        <label class="field"><span>Priority</span><select class="select" id="task-priority"></select></label>
+      </div>
+      <label class="field"><span>Status</span><select class="select" id="task-status"></select></label>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost danger" id="task-delete">Delete</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="sched-dialog">
+    <form method="dialog" id="sched-form">
+      <h2>Dates and milestones</h2>
+      <label class="field"><span>Project</span><select class="select" id="sched-project"></select></label>
+      <div class="field-row">
+        <label class="field"><span>Start date</span><input type="date" id="sched-start"></label>
+        <label class="field"><span>Due date</span><input type="date" id="sched-due"></label>
+      </div>
+      <label class="field"><span>Progress <output id="sched-progress-out" class="muted"></output></span><input type="range" id="sched-progress" min="0" max="100" step="5"></label>
+      <div class="field">
+        <span>Milestones</span>
+        <div class="ms-edit-list" id="sched-ms"></div>
+        <button type="button" class="btn ghost small" id="sched-addms">+ Add milestone</button>
+        <small>Rows left empty are removed when you save.</small>
+      </div>
+      <p class="setup-error" id="sched-error" hidden></p>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="search-dialog" id="search-dialog" aria-label="Search">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" id="search-input" placeholder="Search everything…" autocomplete="off" aria-label="Search">
+      <kbd>esc</kbd>
+    </div>
+    <div class="search-results" id="search-results"></div>
+  </dialog>
+
+  <dialog class="dialog" id="banner-dialog">
+    <form method="dialog">
+      <h2>Banner image</h2>
+      <div class="banner-preview" id="banner-preview"><span>No image. The banner stays plain grey.</span></div>
+      <div class="field" id="banner-y-field">
+        <span>Vertical position</span>
+        <input type="range" id="banner-y" min="0" max="100" step="1" aria-label="Which part of the image shows">
+        <small>Slide to choose which part of the image shows in the banner.</small>
+      </div>
+      <div class="field">
+        <span>Upload or paste</span>
+        <div class="invoice-row"><label class="btn ghost small">Choose image<input type="file" id="banner-file" accept="image/*" hidden></label><span class="muted">or paste an image here (⌘V / Ctrl+V)</span></div>
+      </div>
+      <div class="field">
+        <span>Image address</span>
+        <div class="url-row"><input type="url" id="banner-url" placeholder="https://…/image.jpg" autocomplete="off"><button type="button" class="btn ghost small" id="banner-fetch">Use link</button></div>
+        <small>The image is downloaded into your library, so it still shows offline and is included in backups.</small>
+      </div>
+      <p class="setup-error" id="banner-error" hidden></p>
+      <div class="dialog-actions">
+        <button type="button" class="btn ghost danger" id="banner-remove">Remove image</button>
+        <span class="spacer"></span>
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="details-dialog">
+    <form method="dialog">
+      <h2>Project details</h2>
+      <label class="field"><span>Name</span><input type="text" id="details-name" maxlength="60" required></label>
+      <label class="field" id="details-client-field"><span>Client</span><input type="text" id="details-client" maxlength="80" list="details-orgs" autocomplete="off"><datalist id="details-orgs"></datalist><small>The client organization. People are added in the project's Contacts section.</small></label>
+      <label class="field"><span>Description</span><textarea id="details-description" rows="4" maxlength="4000"></textarea></label>
+      <label class="field"><span>Amount (USD)</span><input type="number" id="details-amount" min="0" step="1" inputmode="decimal"></label>
+      <div class="field">
+        <span>Invoice file</span>
+        <div class="invoice-row"><span id="details-invoice"></span><label class="btn ghost small">Upload<input type="file" id="details-invoice-file" accept="application/pdf,image/*" hidden></label><button type="button" class="btn ghost small" id="details-invoice-remove">Remove</button></div>
+        <small>PDF or image. It's saved in your library and included in backups.</small>
+      </div>
+      <p class="setup-error" id="details-error" hidden></p>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn" value="save">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="qtodo-dialog">
+    <form method="dialog">
+      <h2>New to-do card</h2>
+      <label class="field"><span>To-do</span><input type="text" id="qtodo-text" maxlength="200" required autocomplete="off"></label>
+      <label class="field"><span>Board</span><select class="select" id="qtodo-project"></select></label>
+      <label class="field"><span>Column</span><select class="select" id="qtodo-column"></select></label>
+      <div class="dialog-actions">
+        <button class="btn ghost" value="cancel" formnovalidate>Cancel</button>
+        <button class="btn" value="save">Add</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="dialog" id="restore-dialog">
+    <form method="dialog">
+      <h2 id="restore-title">Restore backup</h2>
+      <div class="restore-body" id="restore-body"></div>
+      <div class="dialog-actions" id="restore-actions"></div>
+    </form>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script type="module" src="js/boot.js"></script>
+</body>
+</html>

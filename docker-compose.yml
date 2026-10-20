@@ -1,0 +1,12 @@
+services:
+  ost-planner:
+    build: .
+    container_name: ost-planner
+    ports:
+      - "1820:1820"
+    volumes:
+      # Where your library is kept on this computer. Change it in the .env file.
+      - "${OST_DATA_DIR:-./data}:/data"
+    environment:
+      HOST_DATA_DIR: "${OST_DATA_DIR:-./data}"
+    restart: unless-stopped

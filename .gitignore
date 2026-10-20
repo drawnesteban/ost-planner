@@ -1,0 +1,11 @@
+# Your library and your own settings stay on this computer.
+data/
+.env
+
+# Build outputs and working screenshots (not part of the app)
+dist/
+screenshots/
+
+.DS_Store
+__MACOSX/
+node_modules/
