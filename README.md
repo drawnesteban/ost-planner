@@ -2,32 +2,60 @@
 
 Self-hosted project and time-management dashboard. Built one screen at a time.
 
-## Install and update with git
+## What you need
 
-First time, in Terminal, from the folder where you keep apps:
+- **Docker**: [Docker Desktop](https://www.docker.com/products/docker-desktop/) on Mac or Windows (open it once so it's running), or Docker Engine on Linux.
+- **git**: already on most Macs (run `git --version` in Terminal; if it isn't there, macOS offers to install it). On Windows, install [Git for Windows](https://git-scm.com/download/win).
+
+## Install
+
+In Terminal, go to the folder where you want the app (for example Documents) and run:
 
 ```sh
-git clone <repo address> ost-planner
+cd ~/Documents
+git clone https://github.com/drawnesteban/ost-planner.git
 cd ost-planner
 docker compose up -d --build
 ```
 
-To update later, from inside that folder:
+Open **http://localhost:1820**. On first launch it asks for a library folder name and what to start with: the sample projects, an empty library, a backup, or what this browser saved in an older version.
+
+## Update
+
+From inside the app's folder:
 
 ```sh
+cd ~/Documents/ost-planner
 git pull
 docker compose up -d --build
 ```
 
-Your library (`data/`) and your `.env` are never in the repository, so pulling updates never touches them. To keep the library somewhere else, copy `.env.example` to `.env` and set `OST_DATA_DIR`.
+Your projects are safe. They live in `data/`, which git never touches, and so does your `.env`.
 
-## Run from a zip
+## Already running it from a zip?
+
+Switch to the git copy once, keeping your data:
 
 ```sh
-docker compose up -d --build
+cd ~/Documents/ost-planner && docker compose down
+cd .. && mv ost-planner ost-planner-old
+git clone https://github.com/drawnesteban/ost-planner.git
+mv ost-planner-old/data ost-planner/
+cp ost-planner-old/.env ost-planner/ 2>/dev/null
+cd ost-planner && docker compose up -d --build
 ```
 
-Then open http://localhost:1820. On first launch it asks for a library folder name and what to start with (bring in what this browser saved, the sample projects, an empty library, or a backup).
+Check http://localhost:1820 shows your projects, then delete `ost-planner-old`.
+
+## Everyday commands
+
+Run these from inside the app's folder.
+
+- Stop: `docker compose down`
+- Start again: `docker compose up -d`
+- Port 1820 already taken: change `"1820:1820"` in `docker-compose.yml` to, say, `"8090:1820"`, run `docker compose up -d`, and open http://localhost:8090. (This edits a tracked file, so `git pull` may complain; run `git stash`, `git pull`, `git stash pop`.)
+- Open from another device on your network: `http://<this-computer's-IP>:1820`
+- `docker: command not found` or "Cannot connect to the Docker daemon": Docker Desktop isn't running. Open it and try again.
 
 ## Where your data lives
 
@@ -47,16 +75,9 @@ Dashboard settings (click the logo and name in the sidebar), Storage and backups
 - Back up project: a .zip of one project with its to-do cards, gallery files and images, and contacts from its client organization.
 - Restore from a backup: a whole-library backup replaces the library (the current one is saved to `backups/` first). A project backup is added; if the same project already exists you choose Replace or Add as a copy.
 
-On a new computer: install Docker, copy this folder, `docker compose up -d --build`, open the page and pick Restore from a backup on the setup screen. Copying the whole `data/` folder also works.
+On a new computer: follow Install above, then pick Restore from a backup on the setup screen. Copying the whole `data/` folder into the new install also works.
 
-Needs Docker Desktop (Mac/Windows) or Docker Engine (Linux).
-
-- Stop: `docker compose down`
-- After changing files: `docker compose up -d --build`
-- Port 1820 taken: change `"1820:1820"` in `docker-compose.yml` to e.g. `"8090:1820"`
-- Open from another device on your network: `http://<this-computer's-IP>:1820`
-
-## Status
+## Build status
 
 | Step | Screen | State |
 |------|--------|-------|
