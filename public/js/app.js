@@ -225,7 +225,7 @@ function onOverviewClick(e) {
 }
 
 const BRAND_KEY = "ost.brand";
-const defaultBrand = { name: "OST Planner", logo: "", theme: "light", accent: "" };
+const defaultBrand = { name: "OST Planner", logo: "", theme: "light", accent: "", bgImage: "", bgPanels: "frosted", bgDim: 30 };
 
 function loadBrand() {
   return { ...defaultBrand, ...store.get(BRAND_KEY) };
@@ -253,6 +253,18 @@ function applyTheme(brand = loadBrand()) {
     root.style.removeProperty("--accent");
     root.style.removeProperty("--on-accent");
   }
+  // Background image: frosted or solid panels over it, dimmed by bgDim percent (dark mode dims a bit more).
+  if (brand.bgImage) {
+    root.dataset.bg = "1";
+    root.dataset.panels = brand.bgPanels === "solid" ? "solid" : "frosted";
+    root.style.setProperty("--bg-img", `url("${brand.bgImage}")`);
+    root.style.setProperty("--veil-a", Math.min(0.9, brand.bgDim / 100 + (dark ? 0.15 : 0)));
+  } else {
+    delete root.dataset.bg;
+    delete root.dataset.panels;
+    root.style.removeProperty("--bg-img");
+    root.style.removeProperty("--veil-a");
+  }
 }
 
 function applyBrand(brand = loadBrand()) {
@@ -262,7 +274,7 @@ function applyBrand(brand = loadBrand()) {
   document.title = brand.name;
 }
 
-// Shrinks an image before it is saved (logo: 256px PNG, covers: 640px JPEG, gallery: 2400px JPEG).
+// Shrinks an image before it is saved (logo: 256px PNG, covers: 640px JPEG, gallery: 2400px JPEG, background: 2880px JPEG).
 function readImage(file, size = 256, type = "image/png") {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -291,6 +303,14 @@ function setupBrandDialog() {
     const custom = draft.accent && !accentChoices.some(([c]) => c.toLowerCase() === draft.accent.toLowerCase());
     document.getElementById("accent-swatches").innerHTML = accentChoices.map(([c, label]) => `<button type="button" class="accent-swatch${(draft.accent || "").toLowerCase() === c.toLowerCase() ? " on" : ""}" data-accent="${c}" style="--c:${c || "var(--text)"}" title="${label}" aria-label="${label}"></button>`).join("")
       + `<label class="accent-swatch accent-custom${custom ? " on" : ""}" title="Custom color"${custom ? ` style="background:${draft.accent}"` : ""}><input type="color" id="accent-custom" value="${draft.accent || "#4c6ef5"}" aria-label="Custom accent color"></label>`;
+    const thumb = document.getElementById("bg-thumb");
+    thumb.style.backgroundImage = draft.bgImage ? `url("${draft.bgImage}")` : "";
+    thumb.textContent = draft.bgImage ? "" : "None";
+    document.getElementById("bg-remove").hidden = !draft.bgImage;
+    document.getElementById("bg-options").hidden = document.getElementById("bg-dim-field").hidden = !draft.bgImage;
+    document.querySelectorAll("[data-bg-panels]").forEach((b) => b.classList.toggle("on", b.dataset.bgPanels === draft.bgPanels));
+    document.getElementById("bg-dim").value = draft.bgDim;
+    document.getElementById("bg-dim-value").textContent = `${draft.bgDim}%`;
     applyTheme(draft);
   };
   document.getElementById("brand").addEventListener("click", () => {
@@ -303,10 +323,15 @@ function setupBrandDialog() {
   dialog.addEventListener("click", (e) => {
     const mode = e.target.closest("[data-theme-mode]");
     const sw = e.target.closest("[data-accent]");
+    const panels = e.target.closest("[data-bg-panels]");
     if (mode) { draft.theme = mode.dataset.themeMode; paintAppearance(); }
     else if (sw) { draft.accent = sw.dataset.accent; paintAppearance(); }
+    else if (panels) { draft.bgPanels = panels.dataset.bgPanels; paintAppearance(); }
   });
-  dialog.addEventListener("input", (e) => { if (e.target.id === "accent-custom") { draft.accent = e.target.value; applyTheme(draft); } });
+  dialog.addEventListener("input", (e) => {
+    if (e.target.id === "accent-custom") { draft.accent = e.target.value; applyTheme(draft); }
+    if (e.target.id === "bg-dim") { draft.bgDim = +e.target.value; paintAppearance(); }
+  });
   dialog.addEventListener("change", (e) => { if (e.target.id === "accent-custom") paintAppearance(); });
   systemDark.addEventListener("change", () => applyTheme());
   input.addEventListener("input", () => { draft.name = input.value; if (!draft.logo) paintMark(preview, draft); });
@@ -317,6 +342,14 @@ function setupBrandDialog() {
     paintMark(preview, draft);
     e.target.value = "";
   });
+  document.getElementById("bg-file").addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    draft.bgImage = await readImage(file, 2880, "image/jpeg");
+    paintAppearance();
+    e.target.value = "";
+  });
+  document.getElementById("bg-remove").addEventListener("click", () => { draft.bgImage = ""; paintAppearance(); });
   document.getElementById("logo-remove").addEventListener("click", () => { draft.logo = ""; paintMark(preview, draft); });
   dialog.addEventListener("close", () => {
     if (dialog.returnValue !== "save") { applyTheme(); return; }

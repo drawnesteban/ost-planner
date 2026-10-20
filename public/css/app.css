@@ -938,3 +938,47 @@ a.file { text-decoration: underline; text-underline-offset: 2px; }
 @media (hover: none) { .thumb .g-delete { opacity: 1; } }
 .rv-delfile svg { width: 16px; height: 16px; }
 .rv-delfile:hover { color: #ff6b6b; }
+
+/* Background image theme (Dashboard settings). One image fills the window behind every screen;
+   panels turn see-through and blurred ("Frosted") or stay nearly opaque ("Solid").
+   --bg-img and --veil-a (how much the image is dimmed) are set from js. */
+:root[data-bg] {
+  --veil: rgb(246 246 244 / var(--veil-a, .3));
+  --bg: rgba(255,255,255,.55);
+  --surface: rgba(255,255,255,.74);
+  --sidebar: rgba(251,251,250,.62);
+  --border: rgba(0,0,0,.08);
+  --hover: rgba(0,0,0,.05);
+  --chip: rgba(0,0,0,.07);
+  --track: rgba(0,0,0,.08);
+  --muted: #5d5d62;
+  --faint: #6e6e74;
+  --glass: blur(22px) saturate(1.5);
+}
+:root[data-bg][data-theme="dark"] {
+  --veil: rgb(8 8 10 / var(--veil-a, .45));
+  --bg: rgba(20,20,22,.5);
+  --surface: rgba(29,29,31,.66);
+  --sidebar: rgba(22,22,24,.58);
+  --border: rgba(255,255,255,.09);
+  --hover: rgba(255,255,255,.06);
+  --chip: rgba(255,255,255,.09);
+  --track: rgba(255,255,255,.1);
+  --muted: #b4b4ba;
+  --faint: #a3a3a9;
+}
+:root[data-bg][data-panels="solid"] { --surface: rgba(255,255,255,.96); --sidebar: rgba(251,251,250,.94); --glass: none; }
+:root[data-bg][data-panels="solid"][data-theme="dark"] { --surface: rgba(29,29,31,.96); --sidebar: rgba(24,24,26,.94); }
+:root[data-bg] body { background: linear-gradient(var(--veil), var(--veil)), var(--bg-img) center / cover fixed, #888; }
+:root[data-bg] .shell { background: transparent; }
+:root[data-bg] .sidebar, :root[data-bg] .card, :root[data-bg] .stat, :root[data-bg] .view-card, :root[data-bg] .project-card,
+:root[data-bg] .todo-col, :root[data-bg] .todo-list, :root[data-bg] .customize-bar, :root[data-bg] .quick-menu, :root[data-bg] .dialog { -webkit-backdrop-filter: var(--glass); backdrop-filter: var(--glass); }
+:root[data-bg] .dialog { background: var(--surface); }
+:root[data-bg][data-theme="light"] .dialog { background: rgba(255,255,255,.88); }
+:root[data-bg] .review { -webkit-backdrop-filter: none; backdrop-filter: none; }
+:root[data-bg] .topbar h1, :root[data-bg] .topbar .eyebrow { text-shadow: 0 1px 14px rgba(255,255,255,.6); }
+:root[data-bg][data-theme="dark"] .topbar h1, :root[data-bg][data-theme="dark"] .topbar .eyebrow { text-shadow: 0 1px 14px rgba(0,0,0,.5); }
+.bg-row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.bg-thumb { width: 96px; height: 60px; border-radius: 8px; background: var(--chip) center / cover no-repeat; border: 1px solid var(--border); flex: none; display: grid; place-items: center; font-size: 11px; color: var(--faint); }
+.bg-slider { display: flex; align-items: center; gap: 10px; }
+.bg-slider input { flex: 1; accent-color: var(--accent); }

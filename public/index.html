@@ -84,6 +84,29 @@
         </div>
       </div>
       <div class="settings-section">
+        <h3>Background</h3>
+        <div class="field">
+          <span>Background image</span>
+          <div class="bg-row">
+            <span class="bg-thumb" id="bg-thumb"></span>
+            <label class="btn ghost">Upload image<input type="file" id="bg-file" accept="image/*" hidden></label>
+            <button class="btn ghost" type="button" id="bg-remove">Remove</button>
+          </div>
+          <small>Fills the whole window behind every screen. Best at 2880 × 1800; keep the subject near the centre. Leave empty for the plain look.</small>
+        </div>
+        <div class="field" id="bg-options">
+          <span>Panels</span>
+          <div class="segmented" role="group" aria-label="Panels">
+            <button type="button" data-bg-panels="frosted">Frosted</button>
+            <button type="button" data-bg-panels="solid">Solid</button>
+          </div>
+        </div>
+        <div class="field" id="bg-dim-field">
+          <span>Dim image</span>
+          <div class="bg-slider"><input type="range" id="bg-dim" min="0" max="80" step="5" aria-label="Dim image"><small id="bg-dim-value"></small></div>
+        </div>
+      </div>
+      <div class="settings-section">
         <h3>Storage and backups</h3>
         <div class="field">
           <span>Library folder</span>
