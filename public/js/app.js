@@ -2348,11 +2348,12 @@ function galleryFigure(g, { project = true } = {}) {
   const p = projectById(g.project);
   const img = versionImage(g, latestVersion(g));
   const badges = `${g.versions.length > 1 ? `<span class="ver">v${g.versions.length}</span>` : ""}${noteCount(g) ? `<span class="notes-badge">${svg("comment")}${noteCount(g)}</span>` : ""}`;
+  const del = `<button type="button" class="g-delete" data-gdelete="${g.id}" aria-label="Delete ${esc(g.title)}" title="Delete image">${TRASH}</button>`;
   return `
   <figure class="upload" data-gopen="${g.id}" tabindex="0">
     ${img
-      ? `<div class="thumb photo" style="background-image:url(${img})"><span class="kind">${g.kind}</span>${badges}</div>`
-      : `<div class="thumb" style="--c:${p.color}">${svg("image")}<span>${g.kind}</span>${badges}</div>`}
+      ? `<div class="thumb photo" style="background-image:url(${img})"><span class="kind">${g.kind}</span>${badges}${del}</div>`
+      : `<div class="thumb" style="--c:${p.color}">${svg("image")}<span>${g.kind}</span>${badges}${del}</div>`}
     <figcaption><b>${esc(g.title)}</b><span>${fmt(g.date)}</span></figcaption>
     ${project ? `<div class="upload-project"><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</div>` : ""}
   </figure>`;
@@ -2420,8 +2421,20 @@ function onGalleryClick(e) {
   else if (t.closest("[data-ggroup]")) { galleryGroup = t.closest("[data-ggroup]").dataset.ggroup; renderGallery(); }
 }
 
+// Deletes right away; the toast offers Undo instead of asking first.
+function removeGalleryItem(g) {
+  const i = gallery.indexOf(g);
+  if (i < 0) return;
+  gallery.splice(i, 1);
+  saveGallery();
+  refreshGalleryViews();
+  toast(`Deleted "${g.title}".`, 8000, { label: "Undo", fn: () => { gallery.splice(Math.min(i, gallery.length), 0, g); saveGallery(); refreshGalleryViews(); } });
+}
+
 // Shared by the gallery screen, project pages and the Overview card.
 function onGalleryItemClick(e) {
+  const del = e.target.closest("[data-gdelete]");
+  if (del) { removeGalleryItem(gallery.find((g) => g.id === +del.dataset.gdelete)); return true; }
   const up = e.target.closest("[data-gupload]");
   if (up) { openUploadDialog(up.dataset.gupload); return true; }
   const fig = e.target.closest("[data-gopen]");
@@ -2552,7 +2565,8 @@ function paintReview() {
   document.getElementById("rv-head").innerHTML = `
     <div class="rv-file"><small><span class="dot" style="background:${p.color}"></span>${esc(p.name)} · ${g.kind}</small><b>${esc(g.title)}</b></div>
     <span class="rv-chip">v${vi + 1} of ${g.versions.length}</span>
-    <span class="rv-count">File ${lightboxIndex + 1} of ${lightboxList.length}</span>`;
+    <span class="rv-count">File ${lightboxIndex + 1} of ${lightboxList.length}</span>
+    <button type="button" class="rv-tool rv-delfile" data-rvdelfile title="Delete this file" aria-label="Delete this file">${TRASH}</button>`;
   document.querySelectorAll("[data-rvfile]").forEach((b) => (b.disabled = lightboxList.length < 2));
 
   document.getElementById("rv-tools").innerHTML = `
@@ -2732,10 +2746,8 @@ function setupReview() {
       rv.versionId = null; rv.compare = "";
       if (rvSave()) paintReview();
     } else if (q("[data-rvdelfile]")) {
-      if (!confirm(`Delete "${g.title}" and all ${g.versions.length} version${g.versions.length > 1 ? "s" : ""}? This can't be undone.`)) return;
-      gallery.splice(gallery.indexOf(g), 1);
-      saveGallery();
       dlg.close();
+      removeGalleryItem(g);
     }
   });
 

@@ -929,3 +929,12 @@ a.file { text-decoration: underline; text-underline-offset: 2px; }
 .url-row input { flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); }
 #banner-dialog input[type=range] { accent-color: var(--accent); }
 @media (max-width: 560px) { .banner-btn span { display: none; } }
+
+/* Gallery: delete button on each thumbnail (always shown on touch screens) */
+.thumb .g-delete { position: absolute; right: 6px; bottom: 6px; width: 28px; height: 28px; border: 0; border-radius: 7px; background: rgba(0,0,0,.55); color: #fff; display: grid; place-items: center; cursor: pointer; opacity: 0; transition: opacity .12s; }
+.thumb .g-delete svg { width: 15px; height: 15px; }
+.upload:hover .g-delete, .upload:focus-within .g-delete { opacity: 1; }
+.thumb .g-delete:hover { background: var(--danger); }
+@media (hover: none) { .thumb .g-delete { opacity: 1; } }
+.rv-delfile svg { width: 16px; height: 16px; }
+.rv-delfile:hover { color: #ff6b6b; }
